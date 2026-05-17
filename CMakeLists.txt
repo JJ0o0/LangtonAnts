@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(LangtonAntsSDL3Project)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(SDL3 REQUIRED)
@@ -27,3 +29,4 @@ add_dependencies(app copy_assets)
 
 target_include_directories(app PRIVATE include)
 target_link_libraries(app PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+target_compile_features(app PRIVATE cxx_std_20)
