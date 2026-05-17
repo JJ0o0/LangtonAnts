@@ -1,6 +1,7 @@
 #include <LangtonAnts/utilities/Utils.hpp>
 #include <iomanip>
 #include <ios>
+#include <sstream>
 #include <string>
 
 namespace JJ0o0::LangtonAnts::Utils {
