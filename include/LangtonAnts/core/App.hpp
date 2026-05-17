@@ -8,6 +8,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <vector>
 
 namespace JJ0o0::LangtonAnts {
 class App {
@@ -25,7 +26,7 @@ private:
   Uint64 m_last;
 
   Grid m_grid;
-  Ant m_ant;
+  std::vector<Ant> m_ants;
 
   int m_width, m_height, m_generation;
   float m_deltatime, m_accumulator, m_interval;

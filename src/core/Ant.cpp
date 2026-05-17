@@ -2,9 +2,7 @@
 #include <LangtonAnts/utilities/Colors.hpp>
 
 namespace JJ0o0::LangtonAnts {
-Ant::Ant(const Grid &grid)
-    : x(grid.getWidth() / 2), y(grid.getHeight() / 2),
-      direction(Utils::Direction::North) {}
+Ant::Ant(int x, int y) : x(x), y(y), direction(Utils::Direction::North) {}
 
 void Ant::step(Grid &grid) {
   bool cell = grid.getCell(x, y);

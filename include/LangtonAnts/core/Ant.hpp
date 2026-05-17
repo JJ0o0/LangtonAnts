@@ -10,7 +10,7 @@ struct Ant {
   int x, y;
   Utils::Direction direction = Utils::Direction::West;
 
-  Ant(const Grid &grid);
+  Ant(int x, int y);
   void step(Grid &grid);
   void render(SDL_Renderer *renderer, int gridWidth, int gridHeight,
               int screenWidth, int screenHeight, int cellSize) const;

@@ -1,3 +1,4 @@
+#include "LangtonAnts/utilities/Utils.hpp"
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_mouse.h>
@@ -13,12 +14,13 @@
 #include <LangtonAnts/core/App.hpp>
 #include <LangtonAnts/utilities/Colors.hpp>
 #include <LangtonAnts/utilities/UI.hpp>
+#include <algorithm>
 
 namespace JJ0o0::LangtonAnts {
 App::App(const char *title, int width, int height)
     : m_width(width), m_height(height), m_running(true), m_paused(false),
       m_accumulator(0.0f), m_interval(0.01f), m_generation(0),
-      m_grid(width / 10, height / 10, 10), m_ant(m_grid) {
+      m_grid(width / 10, height / 10, 10) {
   SDL_Init(SDL_INIT_VIDEO);
   TTF_Init();
 
@@ -61,13 +63,15 @@ void App::update() {
   m_deltatime = (now - m_last) / 1000.0f;
   m_last = now;
 
-  if (m_paused)
+  if (m_paused || m_ants.empty())
     return;
 
   m_accumulator += m_deltatime;
 
   if (m_accumulator >= m_interval) {
-    m_ant.step(m_grid);
+    for (auto &ant : m_ants)
+      ant.step(m_grid);
+
     m_accumulator = 0.0f;
     m_generation++;
   }
@@ -75,15 +79,30 @@ void App::update() {
 
 void App::render() {
   m_grid.render(m_renderer, m_width, m_height);
-  m_ant.render(m_renderer, m_grid.getWidth(), m_grid.getHeight(), m_width,
+
+  for (auto &ant : m_ants)
+    ant.render(m_renderer, m_grid.getWidth(), m_grid.getHeight(), m_width,
                m_height, 10);
+
+  std::string speedText =
+      "speed: " + Utils::FloatToString(1.0f / m_interval, 0) + " steps/s";
+  auto speedTextSize = UI::getTextSize(m_font, speedText);
+  UI::renderText(m_renderer, m_font, speedText,
+                 m_width - speedTextSize.first - 10,
+                 m_height - speedTextSize.second - 50, Colors::TEXT);
 
   std::string generationText =
       "generation: " + Utils::IntToString(m_generation);
-  auto textSize = UI::getTextSize(m_font, generationText);
+  auto generationTextSize = UI::getTextSize(m_font, generationText);
   UI::renderText(m_renderer, m_font, generationText,
-                 m_width - textSize.first - 10, m_height - textSize.second - 10,
-                 Colors::TEXT);
+                 m_width - generationTextSize.first - 10,
+                 m_height - generationTextSize.second - 30, Colors::TEXT);
+
+  std::string pausedText = m_paused ? "paused" : "running";
+  auto pausedTextSize = UI::getTextSize(m_font, pausedText);
+  UI::renderText(m_renderer, m_font, pausedText,
+                 m_width - pausedTextSize.first - 10,
+                 m_height - pausedTextSize.second - 10, Colors::TEXT);
 }
 
 void App::handleEvents(const SDL_Event &event) {
@@ -96,9 +115,44 @@ void App::handleEvents(const SDL_Event &event) {
       m_running = false;
     } else if (event.key.scancode == SDL_SCANCODE_SPACE) {
       m_paused = !m_paused;
+    } else if (event.key.scancode == SDL_SCANCODE_R) {
+      m_ants.clear();
+      m_grid = Grid(m_width / 10, m_height / 10, 10);
+      m_generation = 0;
+    } else if (event.key.scancode == SDL_SCANCODE_M) {
+      m_interval = std::max(0.001f, m_interval - 0.005f);
+    } else if (event.key.scancode == SDL_SCANCODE_N) {
+      m_interval += 0.005f;
     }
 
     break;
+  case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+    if (event.button.button == SDL_BUTTON_LEFT) {
+      float offsetX = (m_width - m_grid.getWidth() * 10) / 2.0f;
+      float offsetY = (m_height - m_grid.getHeight() * 10) / 2.0f;
+
+      int gridX = (event.button.x - offsetX) / 10;
+      int gridY = (event.button.y - offsetY) / 10;
+
+      if (gridX >= 0 && gridX < m_grid.getWidth() && gridY >= 0 &&
+          gridY < m_grid.getHeight()) {
+        bool occupied =
+            std::any_of(m_ants.begin(), m_ants.end(), [&](const Ant &a) {
+              return a.x == gridX && a.y == gridY;
+            });
+
+        if (occupied)
+          m_ants.erase(std::remove_if(m_ants.begin(), m_ants.end(),
+                                      [&](const Ant &a) {
+                                        return a.x == gridX && a.y == gridY;
+                                      }),
+                       m_ants.end());
+        else
+          m_ants.push_back(Ant(gridX, gridY));
+      }
+    }
+    break;
+  }
   }
 }
 
