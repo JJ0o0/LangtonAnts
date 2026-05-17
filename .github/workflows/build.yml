@@ -24,7 +24,8 @@ jobs:
             libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
             libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
             libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev \
-            libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev
+            libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev \
+            libfreetype-dev libharfbuzz-dev
 
       - name: Build SDL3
         run: |
@@ -38,7 +39,7 @@ jobs:
         run: |
           git clone --depth 1 -b main https://github.com/libsdl-org/SDL_ttf.git
           cmake -S SDL_ttf -B SDL_ttf/build -DCMAKE_BUILD_TYPE=Release \
-            -DSDLTTF_VENDORED=ON
+            -DSDLTTF_VENDORED=OFF
           sudo cmake --build SDL_ttf/build
           sudo cmake --install SDL_ttf/build
           sudo ldconfig
