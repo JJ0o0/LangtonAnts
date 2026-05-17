@@ -1,0 +1,75 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake libsdl3-dev libsdl3-ttf-dev
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Copy assets
+        run: cp -r assets build/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LangtonAnts-Linux
+          path: |
+            build/app
+            build/assets
+
+  build-windows:
+    name: Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          vcpkg install sdl3 sdl3-ttf --triplet x64-windows
+
+      - name: Configure
+        run: |
+          cmake -S . -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Copy SDL DLLs and assets
+        run: |
+          copy "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin\SDL3.dll" build\Release\
+          copy "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin\SDL3_ttf.dll" build\Release\
+          xcopy /E /I assets build\Release\assets
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LangtonAnts-Windows
+          path: |
+            build/Release/app.exe
+            build/Release/SDL3.dll
+            build/Release/SDL3_ttf.dll
+            build/Release/assets
