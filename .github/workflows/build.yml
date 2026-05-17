@@ -15,10 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake libsdl3-dev libsdl3-ttf-dev
+          sudo apt install -y cmake ninja-build build-essential git pkg-config \
+            libwayland-dev libxkbcommon-dev libudev-dev libasound2-dev \
+            libpipewire-0.3-dev libdecor-0-dev
+
+      - name: Build SDL3
+        run: |
+          git clone --depth 1 -b main https://github.com/libsdl-org/SDL.git
+          cmake -S SDL -B SDL/build -DCMAKE_BUILD_TYPE=Release
+          sudo cmake --build SDL/build --target install
+          sudo ldconfig
+
+      - name: Build SDL3_ttf
+        run: |
+          git clone --depth 1 -b main https://github.com/libsdl-org/SDL_ttf.git
+          cmake -S SDL_ttf -B SDL_ttf/build -DCMAKE_BUILD_TYPE=Release
+          sudo cmake --build SDL_ttf/build --target install
+          sudo ldconfig
 
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
