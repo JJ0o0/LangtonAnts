@@ -18,9 +18,12 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake ninja-build build-essential git pkg-config \
+          sudo apt install -y cmake build-essential git pkg-config \
             libwayland-dev libxkbcommon-dev libudev-dev libasound2-dev \
-            libpipewire-0.3-dev libdecor-0-dev
+            libpipewire-0.3-dev libdecor-0-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
+            libxi-dev libxfixes-dev libxss-dev libxt-dev \
+            libegl1-mesa-dev libgles2-mesa-dev
 
       - name: Build SDL3
         run: |
